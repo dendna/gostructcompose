@@ -1,0 +1,19 @@
+{
+	"version":"1.0",
+	"conn":
+	{
+		"host":"192.168.0.73",
+		"port":5432,
+		"user":"postgreadmin",
+		"password":"postgreadmin",
+		"dbname":"moscow",
+		"sslmode": "disable"
+		
+	},
+	"tables":
+	[
+		{"schema":"public", "table":"spatial_ref_sys"},
+		{"schema":"geo", "table":"meta_data"},
+		{"schema":"geo", "table":"poi_point"}
+	]
+}
