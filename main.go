@@ -43,7 +43,7 @@ type Tablecol struct {
 
 func main() {
 
-	file := flag.String("file", "meta65.json", "")
+	file := flag.String("file", "meta.json", "")
 	flag.Parse()
 	// fmt.Printf("file: %s\n", *file)
 
