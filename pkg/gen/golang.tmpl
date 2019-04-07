@@ -1,7 +1,0 @@
-package main
-{{range .}}
-// {{.Name}} description goes here ...
-type {{.Name}} struct { {{range .Attrs}}
-	{{.Name}} {{.Type}} {{end}} 
-}
-{{end}}

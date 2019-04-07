@@ -1,0 +1,14 @@
+{
+	"version":"1.1",
+	"intype":"postgresql",
+	"outtype":"golang",
+	"convtype":"postgretogolang",
+	"dest":"entity.go",
+	"location":"host=192.168.0.73 port=5432 user=postgreadmin password=postgreadmin dbname=moscow sslmode=disable",
+	"items":
+	[
+		{ "fullname":"public.spatial_ref_sys" },
+		{ "fullname":"geo.meta_data" },
+		{ "fullname":"geo.poi_point" }
+	]	
+}
