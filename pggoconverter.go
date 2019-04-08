@@ -1,6 +1,9 @@
 package gostructcompose
 
-import "errors"
+import (
+	"errors"
+	"strings"
+)
 
 // PgGoConverter ...
 type PgGoConverter struct{}
@@ -25,7 +28,7 @@ func (pgc PgGoConverter) Convert(srcType string, nullable string) (dstType strin
 	}
 
 	// TODO: decide about array types
-	if nullable == "YES" {
+	if strings.ToUpper(nullable) == "YES" {
 		dstType = "*" + dstType
 	}
 

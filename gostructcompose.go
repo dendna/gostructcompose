@@ -1,5 +1,9 @@
 package gostructcompose
 
+import (
+	"errors"
+)
+
 // Column contains column metadata
 type Column struct {
 	Name       string
@@ -58,8 +62,12 @@ type Generator struct {
 }
 
 // NewGenerator is a constructor ...
-// func NewGenerator(location string, items []Item, dest string, mr MetaReader, ew EntityWriter, tc TypeConverter) (*Generator, error) {
-func NewGenerator(location string, items []Item, dest string, mr MetaReader, ew EntityWriter, tc TypeConverter) *Generator {
+func NewGenerator(location string, items []Item, dest string, mr MetaReader, ew EntityWriter, tc TypeConverter) (*Generator, error) {
+	// func NewGenerator(location string, items []Item, dest string, mr MetaReader, ew EntityWriter, tc TypeConverter) *Generator {
+	if location == "" || items == nil || dest == "" || mr == nil || ew == nil || tc == nil {
+		return nil, errors.New("generator creating: empty parameter")
+	}
+
 	g := &Generator{
 		location:  location,
 		dest:      dest,
@@ -71,7 +79,7 @@ func NewGenerator(location string, items []Item, dest string, mr MetaReader, ew 
 	g.items = make([]Item, len(items))
 	copy(g.items, items)
 
-	return g
+	return g, nil
 }
 
 // Generate is a main method for the entities generating
@@ -98,7 +106,7 @@ func (g *Generator) Generate() error {
 func (g *Generator) transformTables(tables []Table) (ret []Entity, err error) {
 	ret = make([]Entity, len(tables))
 	for index, value := range tables {
-		entity, err := g.getEntity(value)
+		entity, err := g.getEntity(&value)
 		if err != nil {
 			return nil, err
 		}
@@ -107,7 +115,10 @@ func (g *Generator) transformTables(tables []Table) (ret []Entity, err error) {
 	return ret, nil
 }
 
-func (g *Generator) getEntity(table Table) (*Entity, error) {
+func (g *Generator) getEntity(table *Table) (*Entity, error) {
+	if table.Name == "" {
+		return nil, errors.New("item name cannot be empty")
+	}
 	var attrs = make([]Attribute, len(table.Columns))
 	var err error
 	for index, value := range table.Columns {

@@ -2,6 +2,7 @@ package gostructcompose
 
 import (
 	"database/sql"
+	"errors"
 	"strings"
 
 	// postgresql vendor driver
@@ -43,12 +44,15 @@ func (pr *PostgreReader) getTables(items []Item) (ret []Table, err error) {
 	var cols []Column
 	ret = make([]Table, len(items))
 	for index, value := range items {
-		// TODO: error handling strings.Split ?
-		cols, err = pr.getColumns(strings.Split(value.FullName, "."))
+		schema, table, err := splitFullName(value.FullName, ".")
 		if err != nil {
 			return nil, err
 		}
-		ret[index].Name = strings.Split(value.FullName, ".")[1]
+		cols, err = pr.getColumns(schema, table)
+		if err != nil {
+			return nil, err
+		}
+		ret[index].Name = table
 		ret[index].Columns = cols
 	}
 
@@ -57,9 +61,9 @@ func (pr *PostgreReader) getTables(items []Item) (ret []Table, err error) {
 	return ret, nil
 }
 
-func (pr *PostgreReader) getColumns(fullname []string) (ret []Column, err error) {
+func (pr *PostgreReader) getColumns(schema, table string) (ret []Column, err error) {
 	rows, err := pr.db.Query("select column_name, data_type, is_nullable from information_schema.columns where table_schema = $1 and table_name = $2",
-		fullname[0], fullname[1])
+		schema, table)
 	if err != nil {
 		return nil, err
 	}
@@ -74,4 +78,30 @@ func (pr *PostgreReader) getColumns(fullname []string) (ret []Column, err error)
 	}
 	return ret, nil
 
+}
+
+// TODO: method or func ?
+func splitFullName(fullname string, sep string) (schema, table string, err error) {
+	const errEmpty string = "table name cannot be empty"
+
+	if fullname == "" {
+		return "", "", errors.New(errEmpty)
+	}
+
+	if !strings.Contains(fullname, sep) {
+		return "public", fullname, nil
+	}
+
+	schema = strings.Split(fullname, sep)[0]
+	table = strings.Split(fullname, sep)[1]
+
+	if table == "" {
+		return "", "", errors.New(errEmpty)
+	}
+
+	if schema == "" {
+		schema = "public"
+	}
+
+	return schema, table, nil
 }

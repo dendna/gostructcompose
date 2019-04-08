@@ -25,7 +25,11 @@ func main() {
 		var writer gostructcompose.GolangWriter
 		var converter gostructcompose.PgGoConverter
 
-		g := gostructcompose.NewGenerator(connstr, items, dest, reader, writer, converter)
+		g, err := gostructcompose.NewGenerator(connstr, items, dest, reader, writer, converter)
+		if err != nil {
+			fmt.Printf("Error: %v\n", err)
+			os.Exit(2)
+		}
 		err := g.Generate()
 		if err != nil {
 			fmt.Printf("Error: %v", err)
@@ -45,7 +49,11 @@ func main() {
 		os.Exit(2)
 	}
 
-	g := gostructcompose.NewGenerator(cfg.Location, cfg.Items, cfg.Dest, cfg.Reader, cfg.Writer, cfg.Converter)
+	g, err := gostructcompose.NewGenerator(cfg.Location, cfg.Items, cfg.Dest, cfg.Reader, cfg.Writer, cfg.Converter)
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+		os.Exit(2)
+	}
 	err = g.Generate()
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
