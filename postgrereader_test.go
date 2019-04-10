@@ -18,8 +18,9 @@ func TestSplitFullName(t *testing.T) {
 		{fullname: "schema_name.table_name", sep: ".", schema: "schema_name", table: "table_name", wanterr: false},
 	}
 
+	var pr PostgreReader
 	for _, test := range tests {
-		schema, table, err := splitFullName(test.fullname, test.sep)
+		schema, table, err := pr.splitFullName(test.fullname, test.sep)
 		if (err != nil) != test.wanterr {
 			t.Errorf("splitFullName: unexpected error: %v", test)
 			continue

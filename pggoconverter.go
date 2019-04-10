@@ -1,7 +1,6 @@
 package gostructcompose
 
 import (
-	"errors"
 	"strings"
 )
 
@@ -24,7 +23,9 @@ func (pgc PgGoConverter) Convert(srcType string, nullable string) (dstType strin
 	case "USER-DEFINED":
 		dstType = "[]byte"
 	default:
-		return "", errors.New("unknown PostgreSQL datatype")
+		// TODO: implement remaining data types
+		dstType = "STUB"
+		// return "", fmt.Errorf("unknown PostgreSQL datatype: %v", srcType)
 	}
 
 	// TODO: decide about array types

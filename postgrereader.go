@@ -42,18 +42,47 @@ func (pr *PostgreReader) connect(connstr string) (err error) {
 
 func (pr *PostgreReader) getTables(items []Item) (ret []Table, err error) {
 	var cols []Column
-	ret = make([]Table, len(items))
-	for index, value := range items {
-		schema, table, err := splitFullName(value.FullName, ".")
+	ret = make([]Table, 0, len(items))
+
+	for _, value := range items {
+		schema, table, err := pr.splitFullName(value.FullName, ".")
 		if err != nil {
 			return nil, err
 		}
-		cols, err = pr.getColumns(schema, table)
-		if err != nil {
-			return nil, err
+
+		if table == "*" {
+
+			if err = func() error {
+				rows, err := pr.db.Query("select table_name "+
+					" from information_schema.tables "+
+					" where table_type = 'BASE TABLE' and table_schema = $1", schema)
+				if err != nil {
+					return err
+				}
+				defer rows.Close()
+
+				for rows.Next() {
+					if err = rows.Scan(&table); err != nil {
+						return err
+					}
+					cols, err = pr.getColumns(schema, table)
+					if err != nil {
+						return err
+					}
+					ret = append(ret, Table{Name: table, Columns: cols})
+				}
+				return nil
+			}(); err != nil {
+				return nil, err
+			}
+
+		} else {
+			cols, err = pr.getColumns(schema, table)
+			if err != nil {
+				return nil, err
+			}
+			ret = append(ret, Table{Name: table, Columns: cols})
 		}
-		ret[index].Name = table
-		ret[index].Columns = cols
 	}
 
 	// fmt.Println(ret)
@@ -62,7 +91,9 @@ func (pr *PostgreReader) getTables(items []Item) (ret []Table, err error) {
 }
 
 func (pr *PostgreReader) getColumns(schema, table string) (ret []Column, err error) {
-	rows, err := pr.db.Query("select column_name, data_type, is_nullable from information_schema.columns where table_schema = $1 and table_name = $2",
+	rows, err := pr.db.Query("select column_name, data_type, is_nullable "+
+		" from information_schema.columns "+
+		" where table_schema = $1 and table_name = $2",
 		schema, table)
 	if err != nil {
 		return nil, err
@@ -80,8 +111,7 @@ func (pr *PostgreReader) getColumns(schema, table string) (ret []Column, err err
 
 }
 
-// TODO: method or func ?
-func splitFullName(fullname string, sep string) (schema, table string, err error) {
+func (pr *PostgreReader) splitFullName(fullname string, sep string) (schema, table string, err error) {
 	const errEmpty string = "table name cannot be empty"
 
 	if fullname == "" {
