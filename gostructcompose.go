@@ -2,6 +2,8 @@ package gostructcompose
 
 import (
 	"errors"
+
+	"github.com/achiku/varfmt"
 )
 
 // Column contains column metadata
@@ -122,12 +124,17 @@ func (g *Generator) getEntity(table *Table) (*Entity, error) {
 	var attrs = make([]Attribute, len(table.Columns))
 	var err error
 	for index, value := range table.Columns {
-		attrs[index].Name = value.Name
+		attrs[index].Name = g.toUpperCamel(value.Name)
+		// attrs[index].Name = value.Name
 		attrs[index].Type, err = g.converter.Convert(value.DataType, value.IsNullable)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	return &Entity{Name: table.Name, Attrs: attrs}, nil
+	return &Entity{Name: g.toUpperCamel(table.Name), Attrs: attrs}, nil
+}
+
+func (g *Generator) toUpperCamel(s string) string {
+	return varfmt.PublicVarName(s)
 }

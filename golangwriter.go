@@ -10,7 +10,7 @@ import (
 // GolangWriter implements EntityWriter interface to generate Golang source code
 type GolangWriter struct{}
 
-// Write implement EntityWriter interface
+// Write implements EntityWriter interface
 func (gw GolangWriter) Write(dest string, entities []Entity) error {
 	t, err := template.New("golang.tmpl").ParseFiles("golang.tmpl")
 	if err != nil {
